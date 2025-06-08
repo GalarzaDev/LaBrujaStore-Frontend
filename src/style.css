@@ -1,0 +1,6 @@
+/* src/style.css o src/main.css */
+@import "tailwindcss";
+
+@theme {
+  /* Tu configuración personalizada aquí */
+}
