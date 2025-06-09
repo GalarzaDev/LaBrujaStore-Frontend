@@ -1,7 +1,7 @@
 <template>
   <div class="partner-carousel">
     <div class="partner-track">
-      <div v-for="(logo, index) in logosDoblados" :key="index" class="partner-logo">
+      <div class="partner-slide" v-for="(logo, index) in logosDoblados" :key="index">
         <img :src="logo" alt="Partner Logo" />
       </div>
     </div>
@@ -24,7 +24,7 @@ export default {
   },
   computed: {
     logosDoblados() {
-      // duplicamos para efecto infinito
+      // Se duplican para un efecto infinito sin cortes
       return [...this.logos, ...this.logos]
     }
   }
@@ -34,47 +34,43 @@ export default {
 <style scoped>
 .partner-carousel {
   overflow: hidden;
+  white-space: nowrap;
   background-color: #fff;
-  padding: 100px;
-  margin-left: 40px;
-  margin-right: 40px;
-  padding-right: 100px;
-  padding-left: 100px;
+  padding: 50px 100px;
 }
 
 .partner-track {
   display: flex;
-  width: fit-content;
-  animation: scroll-left 20s linear infinite;
+  width: max-content;
+  animation: scroll-left 30s linear infinite;
 }
 
-.partner-logo {
+.partner-slide {
   flex: 0 0 auto;
   width: 120px;
-  margin: 0 16px;
+  margin: 0 24px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.partner-logo img {
+.partner-slide img {
   max-height: 40px;
   max-width: 100%;
   object-fit: contain;
   filter: grayscale(100%);
-  opacity: 0.7;
+  opacity: 0.6;
   transition: filter 0.3s, opacity 0.3s;
 }
 
-.partner-logo img:hover {
+.partner-slide img:hover {
   filter: none;
   opacity: 1;
 }
 
-/* Animación */
 @keyframes scroll-left {
   0% {
-    transform: translateX(0);
+    transform: translateX(0%);
   }
   100% {
     transform: translateX(-50%);
