@@ -9,7 +9,7 @@ import Catalogo from '@/views/CatalogView.vue'
 
 const routes = [
   { path: '/', name: 'Inicio', component: Home },
-  { path: '/catalogo', name: 'Catalogo', component: Catalogo },
+  { path: '/catalog', name: 'Catalogo', component: Catalogo },
   //{ path: '/contactanos', name: 'Contacto', component: Contacto },
   //{ path: '/acerca-de', name: 'Acerca', component: Acerca },
  // { path: '/cotizacion', name: 'Cotizacion', component: Cotizacion }

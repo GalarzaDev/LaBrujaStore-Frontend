@@ -17,11 +17,11 @@
     <!-- Barra inferior -->
     <div class="navbar-bottom">
       <nav>
-        <a href="#">INICIO</a>
-        <a href="#">CATALOGO</a>
-        <a href="#">CONTACTANOS</a>
-        <a href="#">ACERCA DE</a>
-        <a href="#">COTIZACIÓN</a>
+        <router-link to="/">INICIO</router-link>
+        <router-link to="/catalog">CATALOGO</router-link>
+        <router-link to="/contact">CONTACTANOS</router-link>
+        <router-link to="/about">ACERCA DE</router-link>
+        <router-link to="/quote">COTIZACIÓN</router-link>
       </nav>
     </div>
   </div>
@@ -98,10 +98,15 @@ export default {
   text-align: center;
 }
 
-.navbar-bottom nav a {
+.navbar-bottom nav a,
+.navbar-bottom nav router-link {
   color: white;
   margin: 0 20px;
   font-weight: bold;
   text-decoration: none;
+}
+
+.navbar-bottom nav router-link:hover {
+  text-decoration: underline;
 }
 </style>
