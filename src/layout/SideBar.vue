@@ -72,9 +72,9 @@ const store = useStore()
 const drawer = ref(true)
 
 const menuItems = [
-  { title: 'Dashboard', to: '/products', icon: 'mdi-view-dashboard' },
+  { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard' },
   { title: 'Productos', to: '/products', icon: 'mdi-package-variant' },
-  { title: 'Categorías', to: '/categories', icon: 'mdi-tag-multiple' },
+  { title: 'Categorías', to: '/category', icon: 'mdi-tag-multiple' },
   { title: 'Inventario', to: '/inventory', icon: 'mdi-warehouse' },
   { title: 'Reportes', to: '/reports', icon: 'mdi-chart-line' },
   { title: 'Configuración', to: '/settings', icon: 'mdi-cog' },

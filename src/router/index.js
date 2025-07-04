@@ -5,6 +5,7 @@ import Home from '@/views/COMMON/HomeView.vue'
 import Catalogo from '@/views/COMMON/CatalogView.vue'
 import Login from '@/views/COMMON/LoginView.vue'
 import Products from '@/views/ADMIN/ProductView.vue'
+import Category from '@/views/ADMIN/CategoryView.vue'
 
 const routes = [
   // Rutas públicas (sin protección)
@@ -35,12 +36,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
 
-  // { 
-  //   path: '/dashboard', 
-  //   name: 'Dashboard', 
-  //   component: Dashboard,
-  //   meta: { requiresAuth: true }
-  // },
+  { 
+     path: '/category', 
+     name: 'Categoria', 
+     component: Category,
+     meta: { requiresAuth: true }
+   },
 
 
   {
