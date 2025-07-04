@@ -34,7 +34,7 @@ const routes = [
     component: Products,
     meta: { requiresAuth: true }
   },
-  // Aquí puedes agregar más rutas protegidas
+
   // { 
   //   path: '/dashboard', 
   //   name: 'Dashboard', 
@@ -42,7 +42,7 @@ const routes = [
   //   meta: { requiresAuth: true }
   // },
 
-  // Ruta para manejar URLs no encontradas
+
   {
     path: '/:pathMatch(.*)*',
     redirect: () => {
