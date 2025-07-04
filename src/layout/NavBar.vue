@@ -3,14 +3,21 @@
     <!-- Barra superior -->
     <div class="navbar-top">
       <img src="@/assets/logo.png" alt="Logo" class="logo" />
+      
       <div class="search-container">
         <div class="category-select">Categorias</div>
         <input type="text" placeholder="Estoy buscando..." class="search-input" />
         <span class="search-icon">🔍</span>
       </div>
-      <div class="cart">
-        🛒
-        <span class="cart-count">0</span>
+
+      <div class="navbar-actions">
+        <div class="cart">
+          🛒
+          <span class="cart-count">0</span>
+        </div>
+        <router-link to="/login" class="login-link" title="Iniciar sesión">
+          <i class="mdi mdi-account"></i>
+        </router-link>
       </div>
     </div>
 
@@ -34,6 +41,8 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://cdn.jsdelivr.net/npm/@mdi/font@7.3.67/css/materialdesignicons.min.css');
+
 .navbar-top {
   background-color: black;
   display: flex;
@@ -75,6 +84,12 @@ export default {
   color: gray;
 }
 
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .cart {
   color: white;
   font-size: 24px;
@@ -90,6 +105,16 @@ export default {
   font-size: 12px;
   border-radius: 50%;
   padding: 2px 6px;
+}
+
+.login-link {
+  color: white;
+  font-size: 24px;
+  text-decoration: none;
+}
+
+.login-link:hover {
+  color: #ccc;
 }
 
 .navbar-bottom {

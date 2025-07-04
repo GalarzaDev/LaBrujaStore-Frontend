@@ -1,23 +1,103 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import store from '@/store' // Importar el store
 
-// Importa tus vistas
-import Home from '@/views/HomeView.vue'
-import Catalogo from '@/views/CatalogView.vue'
-//import Contacto from '@/views/Contacto.vue'
-//import Acerca from '@/views/Acerca.vue'
-//import Cotizacion from '@/views/Cotizacion.vue'
+import Home from '@/views/COMMON/HomeView.vue'
+import Catalogo from '@/views/COMMON/CatalogView.vue'
+import Login from '@/views/COMMON/LoginView.vue'
+import Products from '@/views/ADMIN/ProductView.vue'
 
 const routes = [
-  { path: '/', name: 'Inicio', component: Home },
-  { path: '/catalog', name: 'Catalogo', component: Catalogo },
-  //{ path: '/contactanos', name: 'Contacto', component: Contacto },
-  //{ path: '/acerca-de', name: 'Acerca', component: Acerca },
- // { path: '/cotizacion', name: 'Cotizacion', component: Cotizacion }
+  // Rutas públicas (sin protección)
+  { 
+    path: '/', 
+    name: 'Inicio', 
+    component: Home,
+    meta: { requiresAuth: false }
+  },
+  { 
+    path: '/catalog', 
+    name: 'Catalogo', 
+    component: Catalogo,
+    meta: { requiresAuth: false }
+  },
+  { 
+    path: '/login', 
+    name: 'Login', 
+    component: Login,
+    meta: { requiresAuth: false }
+  },
+  
+  // Rutas protegidas (requieren autenticación)
+  { 
+    path: '/products', 
+    name: 'Productos', 
+    component: Products,
+    meta: { requiresAuth: true }
+  },
+  // Aquí puedes agregar más rutas protegidas
+  // { 
+  //   path: '/dashboard', 
+  //   name: 'Dashboard', 
+  //   component: Dashboard,
+  //   meta: { requiresAuth: true }
+  // },
+
+  // Ruta para manejar URLs no encontradas
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: () => {
+      // Verificar si el usuario está autenticado
+      const isAuthorized = store.state.authorize
+      
+      if (isAuthorized) {
+        // Si está autorizado, mantener la lógica original o enviar a products
+        if (window.history.state && window.history.state.back) {
+          return window.history.state.back
+        } else {
+          return '/products' // Ruta por defecto para usuarios autenticados
+        }
+      } else {
+        // Si no está autorizado, enviar al inicio
+        return '/'
+      }
+    }
+  }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+
+router.beforeEach((to, from, next) => {
+  const isAuthorized = store.state.authorize
+  const requiresAuth = to.meta.requiresAuth
+  
+  // Si la ruta requiere autenticación
+  if (requiresAuth && !isAuthorized) {
+    // Usuario no autorizado intentando acceder a ruta protegida
+    console.log('🔴 Acceso denegado: Usuario no autorizado')
+    next('/login')
+    return
+  }
+  
+  // Si el usuario está autorizado y trata de ir al login
+  if (isAuthorized && to.name === 'Login') {
+    // Redirigir a la vista principal de usuarios autenticados
+    console.log('🟢 Usuario ya autenticado, redirigiendo a productos')
+    next('/products')
+    return
+  }
+  
+  // Si el usuario está autorizado y va a la raíz (/), llevarlo a products
+  if (isAuthorized && to.path === '/') {
+    console.log('🟢 Usuario autorizado, redirigiendo a vista principal')
+    next('/products')
+    return
+  }
+
+  next()
 })
 
 export default router

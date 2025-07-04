@@ -1,6 +1,6 @@
 <template>
   <section class="carousel-wrapper">
-    <h2 class="carousel-title">🆕 Productos Nuevos</h2>
+    <h2 class="carousel-title"> Productos Nuevos</h2>
 
     <!-- Flechas -->
     <button class="arrow left" @click="scrollLeft">&#8592;</button>
