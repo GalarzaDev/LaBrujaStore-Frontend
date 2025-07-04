@@ -2,25 +2,35 @@
   <v-container class="mt-8 ml-2 mr-5 pr-10">
     <v-row justify="space-between" align="center" class="header-row">
       <h1 class="titulo">Mantenimiento de Productos</h1>
-      <v-btn color="red" prepend-icon="mdi-plus" class="btn-agregar" @click="abrirFormulario">
+      <v-btn color="red" prepend-icon="mdi-plus" class="btn-agregar" @click="dialog = true">
         Nuevo Producto
       </v-btn>
     </v-row>
 
-    <ProductoTable :productos="productos" />
+    <ProductoTable :productos="productos" @editar="editarProducto" @eliminar="eliminarProducto" />
+
+    <v-dialog v-model="dialog" max-width="700">
+      <FormCreate @submit="createProduct" />
+    </v-dialog>
+    <v-dialog v-model="dialogEdit" max-width="700">
+      <UpdateForm :producto="productoEditado" @submit="updateProduct" />
+    </v-dialog>
+
   </v-container>
 </template>
 
 <script setup>
 import ProductoTable from '@/components/products/DataTable.vue'
-import { listProductApi } from '@/api/ProductService'
+import FormCreate from '@/components/products/FormCreate.vue'
+import UpdateForm from '@/components/products/UpdateForm.vue'
+
+import { listProductApi, createProductApi , updateProductApi } from '@/api/ProductService'
 import { ref, onMounted } from 'vue'
 
 const productos = ref([])
-
-const abrirFormulario = () => {
-  console.log('Abrir formulario de producto')
-}
+const dialog = ref(false)
+const dialogEdit = ref(false)
+const productoEditado = ref(null)
 
 const getProduct = async () => {
   try {
@@ -30,6 +40,36 @@ const getProduct = async () => {
     }
   } catch {
     console.error('Error al listar productos')
+  }
+}
+
+const createProduct = async (formData) => {
+  try {
+    const response = await createProductApi(formData)
+    if (response?.status === 201 || response?.status === 200) {
+      dialog.value = false
+      await getProduct()
+    }
+  } catch (error) {
+    console.error('Error al guardar producto', error)
+  }
+}
+
+const editarProducto = (producto) => {
+  productoEditado.value = producto
+  dialogEdit.value = true
+}
+
+const updateProduct = async (formData , id) => {
+
+  try {
+    const response = await updateProductApi(formData , id)
+    if (response?.status === 200) {
+      dialogEdit.value = false
+      await getProduct()
+    }
+  } catch (error) {
+    console.error('Error al actualizar producto', error)
   }
 }
 

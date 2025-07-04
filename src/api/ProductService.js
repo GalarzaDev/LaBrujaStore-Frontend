@@ -14,3 +14,16 @@ export function listProductApi(token ) {
       },
     });
   }
+
+  export function createProductApi(formdata) {
+    return axiosInstance.post(`${baseURLv1}/productos`, formdata);
+  }
+
+   export function updateProductApi(formdata, id) {
+    return axiosInstance.put(`${baseURLv1}/productos/${id}`, formdata);
+  }
+
+
+  
+
+  

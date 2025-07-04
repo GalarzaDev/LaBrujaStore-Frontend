@@ -7,24 +7,24 @@
       density="comfortable"
       item-value="id"
     >
-      <!-- Columna personalizada: Categoría -->
+  
       <template v-slot:[`item.categoria`]="{ item }">
         {{ item.categoria?.nombre || 'Sin categoría' }}
       </template>
 
-      <!-- Columna personalizada: Estado -->
+      
       <template v-slot:[`item.estado`]="{ item }">
         <v-chip :color="item.estado ? 'green' : 'red'" text-color="white" small>
           {{ item.estado ? 'Activo' : 'Inactivo' }}
         </v-chip>
       </template>
 
-      <!-- Acciones -->
+
       <template v-slot:[`item.acciones`]="{ item }">
-        <v-btn icon size="small" @click="editar(item)">
+        <v-btn icon size="small" @click="emitEditar(item)">
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
-        <v-btn icon size="small" color="error" @click="eliminar(item)">
+        <v-btn icon size="small" color="error" @click="emitEliminar(item)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>
@@ -33,8 +33,8 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
-
+import { defineProps , defineEmits} from 'vue'
+const emit = defineEmits(['editar', 'eliminar'])
 defineProps({
   productos: {
     type: Array,
@@ -52,11 +52,11 @@ const headers = [
   { title: 'Acciones', key: 'acciones', sortable: false }
 ]
 
-const editar = (producto) => {
-  console.log('Editar producto:', producto)
+const emitEditar = (producto) => {
+  emit('editar', producto)
 }
 
-const eliminar = (producto) => {
-  console.log('Eliminar producto:', producto)
+const emitEliminar = (producto) => {
+  emit('eliminar', producto)
 }
 </script>
