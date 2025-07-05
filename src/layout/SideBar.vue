@@ -62,7 +62,7 @@ const menuItems = [
   { title: 'Inventario', to: '/inventory', icon: 'mdi-warehouse', rolesPermitidos: ['ADMINISTRADOR'] },
   { title: 'Reportes', to: '/reports', icon: 'mdi-chart-line', rolesPermitidos: ['ADMINISTRADOR'] },
   { title: 'Configuración', to: '/settings', icon: 'mdi-cog', rolesPermitidos: ['ADMINISTRADOR'] },
-  { title: 'Mis Compras', to: '/compras', icon: 'mdi-cart', rolesPermitidos: ['CLIENTE'] },
+  { title: 'Mis Compras', to: '/shopping', icon: 'mdi-cart', rolesPermitidos: ['CLIENTE'] },
   { title: 'Perfil', to: '/perfil', icon: 'mdi-account', rolesPermitidos: ['CLIENTE'] },
 ]
 

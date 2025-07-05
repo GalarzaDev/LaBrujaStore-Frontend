@@ -3,8 +3,8 @@
     <div class="image-section" />
     <div class="form-section">
       <div class="login-container">
-        <h1>Iniciar Sesión</h1>
-        <LoginForm @submit="handleLogin" />
+        <h1>{{ isRegistering ? 'Registrarse' : 'Iniciar Sesión' }}</h1>
+        <LoginForm @submit="handleAuth" />
       </div>
     </div>
   </div>
@@ -12,51 +12,55 @@
 
 <script setup>
 import LoginForm from '@/components/login/LoginForm.vue'
-import { userLoginApi } from '@/api/UserService'
+import { loginUserApi, createUserApi } from '@/api/UserService'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 
 const store = useStore()
 const router = useRouter()
+const isRegistering = ref(false)
 
-const handleLogin = async (body) => {
-  try {
-    const response = await userLoginApi(body)
+const handleAuth = async (body, tipo) => {
+  if (tipo === 'login') {
+    try {
+      const response = await loginUserApi(body)
 
-    console.log('🟢 Response data:', response.data)
+      if (response && response.data && response.status === 200) {
+        const {id,  nombre, apellido, correo, rol } = response.data
 
-    if (response && response.data && response.status === 200) {
-      const { nombre, apellido, correo, rol } = response.data
+        store.commit('setNombre', nombre)
+        store.commit('setApellido', apellido)
+        store.commit('setCorreo', correo)
+         store.commit('setId', id)
+        store.commit('setRol', rol?.nombre || '')
+        store.commit('setAuthorize', true)
 
-      // Opción 1: Usar mutaciones individuales
-      store.commit('setNombre', nombre)
-      store.commit('setApellido', apellido)
-      store.commit('setCorreo', correo)
-      store.commit('setRol', rol?.nombre || '')
-      store.commit('setAuthorize', true) // Establecer como autorizado
-
-      // Opción 2: Usar una sola mutación (más eficiente)
-      // store.commit('setUserData', {
-      //   nombre,
-      //   apellido,
-      //   correo,
-      //   rol: rol?.nombre || '',
-      //   authorize: true
-      // })
-
-      console.log('🟢 Datos guardados en el store correctamente')
-      console.log('🟢 Estado del store:', store.getters.getUserData)
-
-      router.push('/')
-    } else {
-      // Si no es status 200, no autorizar
+        router.push('/')
+      } else {
+        store.commit('setAuthorize', false)
+        alert('Credenciales incorrectas')
+      }
+    } catch (error) {
       store.commit('setAuthorize', false)
-      console.log('🔴 Login fallido - no autorizado')
+      alert('Error al iniciar sesión')
     }
-  } catch (error) {
-    console.error('🔴 Error al iniciar sesión', error)
-    // En caso de error, asegurar que no esté autorizado
-    store.commit('setAuthorize', false)
+  }
+
+  if (tipo === 'register') {
+    try {
+      const response = await createUserApi(body)
+
+      if (response && response.status === 201) {
+        alert('Usuario registrado correctamente. Ahora puedes iniciar sesión.')
+        window.location.reload() 
+      } else {
+        alert('No se pudo registrar el usuario.')
+      }
+    } catch (error) {
+      console.error('Error al registrar usuario:', error)
+      alert('Hubo un error durante el registro.')
+    }
   }
 }
 </script>
@@ -99,7 +103,6 @@ const handleLogin = async (body) => {
   color: #333;
 }
 
-/* Mostrar la imagen solo en pantallas grandes */
 @media (min-width: 768px) {
   .image-section {
     display: block;

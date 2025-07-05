@@ -8,6 +8,7 @@ const loadFromStorage = () => {
       const parsed = JSON.parse(data)
       return {
         nombre: parsed.nombre || '',
+        id: parsed.id || '',
         apellido: parsed.apellido || '',
         correo: parsed.correo || '',
         rol: parsed.rol || '',
@@ -21,6 +22,7 @@ const loadFromStorage = () => {
   }
   return {
     nombre: '',
+    id: '',
     apellido: '',
     correo: '',
     rol: '',
@@ -34,6 +36,7 @@ const loadFromStorage = () => {
 const saveToStorage = (state) => {
   try {
     localStorage.setItem('userStore', JSON.stringify({
+      id: state.id,
       nombre: state.nombre,
       apellido: state.apellido,
       correo: state.correo,
@@ -52,6 +55,10 @@ const store = createStore({
     ...loadFromStorage() // Cargar datos iniciales
   },
   mutations: {
+    setId(state, id) {
+      state.id = id
+      saveToStorage(state)
+    },
     setNombre(state, nombre) {
       state.nombre = nombre
       saveToStorage(state)
@@ -73,6 +80,7 @@ const store = createStore({
       saveToStorage(state)
     },
     setUserData(state, userData) {
+      state.id = userData.id || ''
       state.nombre = userData.nombre || ''
       state.apellido = userData.apellido || ''
       state.correo = userData.correo || ''
@@ -83,6 +91,7 @@ const store = createStore({
       saveToStorage(state)
     },
     clearUser(state) {
+      state.id = ''
       state.nombre = ''
       state.apellido = ''
       state.correo = ''
@@ -110,6 +119,7 @@ const store = createStore({
     isLoggedIn: (state) => !!state.correo && state.authorize,
     isAuthorized: (state) => state.authorize,
     getUserData: (state) => ({
+      id: state.id,
       nombre: state.nombre,
       apellido: state.apellido,
       correo: state.correo,

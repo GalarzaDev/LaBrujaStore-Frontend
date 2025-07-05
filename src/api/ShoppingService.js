@@ -16,3 +16,7 @@ export function createShoppingApi(payload) {
 export function createDetailShoppingApi(payload) {
     return axiosInstance.post(`${baseURLv1}/detalles-compra`, payload);
 }
+
+export function listUserShoppingApi(id) {
+    return axiosInstance.get(`${baseURLv1}/compras/usuario/${id}`);
+}

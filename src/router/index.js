@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import store from '@/store' // Importar el store
+import store from '@/store' 
 
 import Home from '@/views/COMMON/HomeView.vue'
 import Catalogo from '@/views/COMMON/CatalogView.vue'
@@ -8,6 +8,8 @@ import Products from '@/views/ADMIN/ProductView.vue'
 import Category from '@/views/ADMIN/CategoryView.vue'
 import ProductDetail from '@/views/COMMON/ProductDetailView.vue'
 import Cart from '@/views/COMMON/CartShoppingView.vue'
+import Shopping from '@/views/CLIENT/ShoppingView.vue'
+
 const routes = [
   // Rutas públicas (sin protección)
   {
@@ -55,6 +57,13 @@ const routes = [
     path: '/category',
     name: 'Categoria',
     component: Category,
+    meta: { requiresAuth: true }
+  },
+
+    {
+    path: '/shopping',
+    name: 'shopping',
+    component: Shopping,
     meta: { requiresAuth: true }
   },
 

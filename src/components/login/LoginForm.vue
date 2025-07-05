@@ -1,5 +1,6 @@
 <template>
   <form @submit.prevent="handleSubmit" class="login-form">
+    <!-- Correo -->
     <div class="form-group">
       <label for="correo">Correo electrónico</label>
       <input
@@ -11,6 +12,7 @@
       />
     </div>
 
+    <!-- Contraseña -->
     <div class="form-group">
       <label for="contra">Contraseña</label>
       <input
@@ -22,37 +24,102 @@
       />
     </div>
 
+    <!-- Si está registrando -->
+    <template v-if="modoRegistro">
+      <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input
+          id="nombre"
+          type="text"
+          v-model="nombre"
+          required
+          placeholder="Tu nombre"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="apellido">Apellido</label>
+        <input
+          id="apellido"
+          type="text"
+          v-model="apellido"
+          required
+          placeholder="Tu apellido"
+        />
+      </div>
+    </template>
+
+    <!-- Botones -->
     <div class="button-group">
-      <button type="submit" class="btn-submit">Iniciar sesión</button>
+      <button type="submit" class="btn-submit">
+        {{ modoRegistro ? 'Registrarse' : 'Iniciar sesión' }}
+      </button>
       <button type="button" class="btn-back" @click="volverInicio">
         ← Volver al inicio
+      </button>
+      <button type="button" class="btn-toggle" @click="toggleModo">
+        {{ modoRegistro ? '¿Ya tienes cuenta?' : '¿No estás registrado?' }}
       </button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { ref , defineEmits } from 'vue'
+import { ref , defineEmits} from 'vue'
 import { useRouter } from 'vue-router'
+import { listRoleApi } from '@/api/RoleService'
 
 const emit = defineEmits(['submit'])
 const router = useRouter()
 
 const correo = ref('')
 const contra = ref('')
-
-const handleSubmit = () => {
-  const body = {
-    correo: correo.value,
-    contra: contra.value
-  }
-  emit('submit', body)
-}
+const nombre = ref('')
+const apellido = ref('')
+const modoRegistro = ref(false)
 
 const volverInicio = () => {
   router.push('/')
 }
+
+const toggleModo = () => {
+  modoRegistro.value = !modoRegistro.value
+}
+
+const handleSubmit = async () => {
+  if (!modoRegistro.value) {
+    // LOGIN
+    const payload = {
+      correo: correo.value,
+      contra: contra.value
+    }
+    emit('submit', payload, 'login') // <-- SE EMITEN DOS PARÁMETROS
+  } else {
+    // REGISTRO
+    try {
+      const response = await listRoleApi()
+      const roles = response?.data || []
+      const rolCliente = roles.find(r => r.nombre === 'CLIENTE')
+      const rolId = rolCliente ? rolCliente.id : 2
+
+      const payload = {
+        nombre: nombre.value,
+        apellido: apellido.value,
+        correo: correo.value,
+        contra: contra.value,
+        rol: {
+          id: rolId
+        }
+      }
+
+      emit('submit', payload, 'register') // <-- SE EMITEN DOS PARÁMETROS
+    } catch (error) {
+      console.error('Error al obtener roles:', error)
+    }
+  }
+}
 </script>
+
 
 <style scoped>
 .login-form {
@@ -109,7 +176,8 @@ const volverInicio = () => {
   background-color: #a40404;
 }
 
-.btn-back {
+.btn-back,
+.btn-toggle {
   background-color: transparent;
   border: 2px solid #c40606;
   color: #c40606;
@@ -121,7 +189,8 @@ const volverInicio = () => {
   transition: all 0.3s;
 }
 
-.btn-back:hover {
+.btn-back:hover,
+.btn-toggle:hover {
   background-color: #ffeaea;
 }
 </style>

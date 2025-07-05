@@ -112,7 +112,7 @@ import { useRouter } from 'vue-router'
 import { listProductApi } from '@/api/ProductService'
 import { createShoppingApi } from '@/api/ShoppingService'
 import { createDetailShoppingApi } from '@/api/ShoppingService'
-import { userLoginApi } from '@/api/UserService'
+import { loginUserApi } from '@/api/UserService'
 
 const store = useStore()
 const router = useRouter()
@@ -181,7 +181,7 @@ const pasoAnterior = () => {
 
 const loginUsuario = async () => {
   try {
-    const response = await userLoginApi({ 
+    const response = await loginUserApi({ 
       correo: correo.value, 
       contra: contrasena.value 
     })
