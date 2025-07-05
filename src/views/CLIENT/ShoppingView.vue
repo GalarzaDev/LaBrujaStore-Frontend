@@ -20,12 +20,12 @@
 </template>
 
 <script setup>
-import Datatable from '@/components/category/DataTable.vue'
+import Datatable from '@/components/shopping/DataTable.vue'
 import FormCreate from '@/components/category/FormCreate.vue'
 import UpdateForm from '@/components/products/UpdateForm.vue'
 import { useStore } from 'vuex'
 import { updateProductApi } from '@/api/ProductService'
-import { listCategoryApi, createCategoryApi } from '@/api/CategoryService'
+import { listUserShoppingApi } from '@/api/ShoppingService'
 import { ref, onMounted , computed} from 'vue'
 
 const items = ref([])
@@ -36,8 +36,9 @@ const store = useStore()
 const userid = computed(() => store.state.id)
 
 const getItems = async () => {
+    console.log(userid , "sss")
     try {
-        const response = await listCategoryApi(userid)
+        const response = await listUserShoppingApi(userid.value)
         if (response) {
             items.value = response.data
         }
@@ -46,17 +47,7 @@ const getItems = async () => {
     }
 }
 
-const createItem = async (formData) => {
-    try {
-        const response = await createCategoryApi(formData)
-        if (response?.status === 201 || response?.status === 200) {
-            dialog.value = false
-            await getItems()
-        }
-    } catch (error) {
-        console.error('Error al guardar item', error)
-    }
-}
+
 
 const editItem = (item) => {
     selectedItem.value = item
