@@ -2,8 +2,8 @@
   <div>
     <!-- Barra superior -->
     <div class="navbar-top">
-      <img src="@/assets/logo.png" alt="Logo" class="logo" />
-      
+      <img src="/logo.jpeg" alt="Logo" class="logo" />
+
       <div class="search-container">
         <div class="category-select">Categorias</div>
         <input type="text" placeholder="Estoy buscando..." class="search-input" />
@@ -11,10 +11,14 @@
       </div>
 
       <div class="navbar-actions">
-        <div class="cart">
-          🛒
-          <span class="cart-count">0</span>
-        </div>
+        <router-link to="/cart" class="cart-link" title="Ver carrito">
+          <div class="cart">
+            <i class="mdi mdi-cart-outline"></i>
+            <span class="cart-count" v-if="carritoCount > 0">{{ carritoCount }}</span>
+          </div>
+        </router-link>
+
+
         <router-link to="/login" class="login-link" title="Iniciar sesión">
           <i class="mdi mdi-account"></i>
         </router-link>
@@ -25,7 +29,7 @@
     <div class="navbar-bottom">
       <nav>
         <router-link to="/">INICIO</router-link>
-        <router-link to="/catalog">CATALOGO</router-link>
+        <router-link to="/catalog">CATÁLOGO</router-link>
         <router-link to="/contact">CONTACTANOS</router-link>
         <router-link to="/about">ACERCA DE</router-link>
         <router-link to="/quote">COTIZACIÓN</router-link>
@@ -34,11 +38,16 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'NavBar',
-}
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+
+const store = useStore()
+
+// Computado reactivo para contar productos en el carrito
+const carritoCount = computed(() => store.state.carrito.length)
 </script>
+
 
 <style scoped>
 @import url('https://cdn.jsdelivr.net/npm/@mdi/font@7.3.67/css/materialdesignicons.min.css');
@@ -134,4 +143,10 @@ export default {
 .navbar-bottom nav router-link:hover {
   text-decoration: underline;
 }
+
+.cart-link {
+  text-decoration: none;
+  color: rgb(255, 6, 6);
+}
+
 </style>

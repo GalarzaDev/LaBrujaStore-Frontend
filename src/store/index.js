@@ -5,9 +5,15 @@ const loadFromStorage = () => {
   try {
     const data = localStorage.getItem('userStore')
     if (data) {
+      const parsed = JSON.parse(data)
       return {
-        ...JSON.parse(data),
-        productoSeleccionado: JSON.parse(data).productoSeleccionado || null
+        nombre: parsed.nombre || '',
+        apellido: parsed.apellido || '',
+        correo: parsed.correo || '',
+        rol: parsed.rol || '',
+        authorize: parsed.authorize || false,
+        productoSeleccionado: parsed.productoSeleccionado || null,
+        carrito: parsed.carrito || []
       }
     }
   } catch (error) {
@@ -19,7 +25,8 @@ const loadFromStorage = () => {
     correo: '',
     rol: '',
     authorize: false,
-    productoSeleccionado: null
+    productoSeleccionado: null,
+    carrito: []
   }
 }
 
@@ -32,7 +39,8 @@ const saveToStorage = (state) => {
       correo: state.correo,
       rol: state.rol,
       authorize: state.authorize,
-      productoSeleccionado: state.productoSeleccionado
+      productoSeleccionado: state.productoSeleccionado,
+      carrito: state.carrito
     }))
   } catch (error) {
     console.error('Error al guardar datos en localStorage:', error)
@@ -71,6 +79,7 @@ const store = createStore({
       state.rol = userData.rol || ''
       state.authorize = userData.authorize || false
       state.productoSeleccionado = userData.productoSeleccionado || null
+      state.carrito = userData.carrito || []
       saveToStorage(state)
     },
     clearUser(state) {
@@ -80,10 +89,19 @@ const store = createStore({
       state.rol = ''
       state.authorize = false
       state.productoSeleccionado = null
+      state.carrito = []
       localStorage.removeItem('userStore')
     },
     setProductoSeleccionado(state, productoId) {
       state.productoSeleccionado = productoId
+      saveToStorage(state)
+    },
+    agregarAlCarrito(state, item) {
+      state.carrito.push(item)
+      saveToStorage(state)
+    },
+    limpiarCarrito(state) {
+      state.carrito = []
       saveToStorage(state)
     }
   },
@@ -98,7 +116,8 @@ const store = createStore({
       rol: state.rol,
       authorize: state.authorize
     }),
-    getProductoSeleccionado: (state) => state.productoSeleccionado
+    getProductoSeleccionado: (state) => state.productoSeleccionado,
+    getCarrito: (state) => state.carrito
   }
 })
 

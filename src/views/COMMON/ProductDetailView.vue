@@ -1,15 +1,12 @@
 <template>
   <section v-if="product" class="detail-wrapper">
-    <!-- Imagen del producto -->
     <div class="image-container">
       <img :src="getImageUrl(product.id)" alt="Imagen del producto" />
     </div>
 
-    <!-- Detalles del producto -->
     <div class="info-container">
       <h1 class="title">{{ product.nombre }}</h1>
 
-      <!-- Características -->
       <p class="caracteristicas">
         {{ product.caracteristicas }}
       </p>
@@ -21,21 +18,18 @@
         <li><strong>Arequipa:</strong> 0</li>
       </ul>
 
-      <!-- Precio y acciones -->
       <div class="price-box">
         <h2>S/. {{ product.precioVenta }}</h2>
         <p>*Sin recargo adicional por pago en Efectivo o Transferencia.</p>
         <p>Impuestos incluidos</p>
 
-        <!-- Selector de cantidad -->
         <div class="quantity-box">
           <button @click="decreaseQty">−</button>
           <input type="number" v-model="cantidad" min="1" />
           <button @click="increaseQty">+</button>
         </div>
 
-        <!-- Botón de carrito -->
-        <button class="buy-btn">
+        <button class="buy-btn" @click="agregarAlCarrito">
           <i class="mdi mdi-cart"></i> Agregar Carrito
         </button>
       </div>
@@ -73,10 +67,29 @@ const decreaseQty = () => {
   if (cantidad.value > 1) cantidad.value--
 }
 
+const agregarAlCarrito = () => {
+  if (!product.value) return
+
+  const nuevoItem = {
+    cantidad: cantidad.value,
+    precioParcial: cantidad.value * product.value.precioVenta,
+    compra: {
+      id: null 
+    },
+    producto: {
+      id: product.value.id
+    }
+  }
+
+  store.commit('agregarAlCarrito', nuevoItem)
+  alert('Producto agregado al carrito.')
+}
+
 onMounted(() => {
   getProductById()
 })
 </script>
+
 
 <style scoped>
 .detail-wrapper {

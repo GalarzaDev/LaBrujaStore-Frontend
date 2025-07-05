@@ -3,13 +3,13 @@
     <div class="footer-container">
       <!-- Logo y redes -->
       <div class="footer-column">
-        <img src="/logo.png" alt="La Bruja Logo" class="logo" />
+        <img src="/logo.jpeg" alt="La Bruja Logo" class="logo" />
         <p>Consigue las mejores marcas a los mejores precios, aquí en La Bruja Store.</p>
         <p>Síguenos en nuestras redes sociales:</p>
         <div class="social-icons">
-          <img src="/icons/facebook.svg" alt="Facebook" />
-          <img src="/icons/instagram.svg" alt="Instagram" />
-          <img src="/icons/tiktok.svg" alt="TikTok" />
+          <img src="/icon/facebook.svg" alt="Facebook" />
+          <img src="/icon/instagram.svg" alt="Instagram" />
+          <img src="/icon/tiktok.svg" alt="TikTok" />
         </div>
       </div>
 
