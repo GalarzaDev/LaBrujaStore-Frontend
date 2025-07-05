@@ -6,7 +6,7 @@ import Catalogo from '@/views/COMMON/CatalogView.vue'
 import Login from '@/views/COMMON/LoginView.vue'
 import Products from '@/views/ADMIN/ProductView.vue'
 import Category from '@/views/ADMIN/CategoryView.vue'
-
+import ProductDetail from '@/views/COMMON/ProductDetailView.vue'
 const routes = [
   // Rutas públicas (sin protección)
   { 
@@ -27,14 +27,22 @@ const routes = [
     component: Login,
     meta: { requiresAuth: false }
   },
+   { 
+    path: '/productDetail', 
+    name: 'productDetail', 
+    component: ProductDetail,
+    meta: { requiresAuth: false }
+  },
   
-  // Rutas protegidas (requieren autenticación)
+
   { 
     path: '/products', 
     name: 'Productos', 
     component: Products,
     meta: { requiresAuth: true }
   },
+
+  
 
   { 
      path: '/category', 

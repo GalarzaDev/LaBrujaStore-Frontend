@@ -24,6 +24,11 @@ export function listProductApi(token ) {
   }
 
 
+     export function listByProductApi(formdata, id) {
+    return axiosInstance.get(`${baseURLv1}/productos/${id}`, formdata);
+  }
+
+
   
 
   

@@ -5,7 +5,10 @@ const loadFromStorage = () => {
   try {
     const data = localStorage.getItem('userStore')
     if (data) {
-      return JSON.parse(data)
+      return {
+        ...JSON.parse(data),
+        productoSeleccionado: JSON.parse(data).productoSeleccionado || null
+      }
     }
   } catch (error) {
     console.error('Error al cargar datos del localStorage:', error)
@@ -15,7 +18,8 @@ const loadFromStorage = () => {
     apellido: '',
     correo: '',
     rol: '',
-    authorize: false
+    authorize: false,
+    productoSeleccionado: null
   }
 }
 
@@ -27,7 +31,8 @@ const saveToStorage = (state) => {
       apellido: state.apellido,
       correo: state.correo,
       rol: state.rol,
-      authorize: state.authorize
+      authorize: state.authorize,
+      productoSeleccionado: state.productoSeleccionado
     }))
   } catch (error) {
     console.error('Error al guardar datos en localStorage:', error)
@@ -36,7 +41,7 @@ const saveToStorage = (state) => {
 
 const store = createStore({
   state: {
-    ...loadFromStorage() // Cargar datos al inicializar
+    ...loadFromStorage() // Cargar datos iniciales
   },
   mutations: {
     setNombre(state, nombre) {
@@ -59,13 +64,13 @@ const store = createStore({
       state.authorize = authorize
       saveToStorage(state)
     },
-    // Mutación para establecer todos los datos de una vez
     setUserData(state, userData) {
       state.nombre = userData.nombre || ''
       state.apellido = userData.apellido || ''
       state.correo = userData.correo || ''
       state.rol = userData.rol || ''
       state.authorize = userData.authorize || false
+      state.productoSeleccionado = userData.productoSeleccionado || null
       saveToStorage(state)
     },
     clearUser(state) {
@@ -74,8 +79,12 @@ const store = createStore({
       state.correo = ''
       state.rol = ''
       state.authorize = false
-      // Limpiar también el localStorage
+      state.productoSeleccionado = null
       localStorage.removeItem('userStore')
+    },
+    setProductoSeleccionado(state, productoId) {
+      state.productoSeleccionado = productoId
+      saveToStorage(state)
     }
   },
   getters: {
@@ -88,7 +97,8 @@ const store = createStore({
       correo: state.correo,
       rol: state.rol,
       authorize: state.authorize
-    })
+    }),
+    getProductoSeleccionado: (state) => state.productoSeleccionado
   }
 })
 

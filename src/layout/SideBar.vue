@@ -1,11 +1,5 @@
 <template>
-  <v-navigation-drawer
-    v-model="drawer"
-    app
-    permanent
-    class="custom-sidebar"
-    width="280"
-  >
+  <v-navigation-drawer v-model="drawer" app permanent class="custom-sidebar" width="280">
     <!-- Header del sidebar -->
     <div class="sidebar-header">
       <div class="logo-container">
@@ -17,43 +11,32 @@
       </div>
     </div>
 
-    <!-- Divider -->
+
     <v-divider class="custom-divider"></v-divider>
 
-    <!-- Navigation Items -->
+
     <v-list class="custom-list" nav>
-      <v-list-item
-        v-for="(item, index) in menuItems"
-        :key="index"
-        :to="item.to"
-        link
-        class="custom-list-item"
-        active-class="active-item"
-      >
+      <v-list-item v-for="(item, index) in itemsVisibles" :key="index" :to="item.to" link class="custom-list-item"
+        active-class="active-item">
         <template v-slot:prepend>
           <v-icon class="item-icon">{{ item.icon }}</v-icon>
         </template>
-        
+
         <v-list-item-title class="item-title">
           {{ item.title }}
         </v-list-item-title>
-        
-        <!-- Indicador de ruta activa -->
+
         <template v-slot:append>
           <div class="active-indicator"></div>
         </template>
       </v-list-item>
     </v-list>
 
+
     <!-- Footer del sidebar -->
     <template v-slot:append>
       <div class="sidebar-footer">
-        <v-btn
-          class="logout-btn"
-          variant="outlined"
-          block
-          @click="logout"
-        >
+        <v-btn class="logout-btn" variant="outlined" block @click="logout">
           <v-icon left>mdi-logout</v-icon>
           Cerrar Sesión
         </v-btn>
@@ -66,19 +49,27 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
+import { computed } from 'vue'
 
 const router = useRouter()
 const store = useStore()
 const drawer = ref(true)
-
+const rol = computed(() => store.state.rol)
 const menuItems = [
-  { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard' },
-  { title: 'Productos', to: '/products', icon: 'mdi-package-variant' },
-  { title: 'Categorías', to: '/category', icon: 'mdi-tag-multiple' },
-  { title: 'Inventario', to: '/inventory', icon: 'mdi-warehouse' },
-  { title: 'Reportes', to: '/reports', icon: 'mdi-chart-line' },
-  { title: 'Configuración', to: '/settings', icon: 'mdi-cog' },
+  { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard', rolesPermitidos: ['ADMINISTRADOR'] },
+  { title: 'Productos', to: '/products', icon: 'mdi-package-variant', rolesPermitidos: ['ADMINISTRADOR'] },
+  { title: 'Categorías', to: '/category', icon: 'mdi-tag-multiple', rolesPermitidos: ['ADMINISTRADOR'] },
+  { title: 'Inventario', to: '/inventory', icon: 'mdi-warehouse', rolesPermitidos: ['ADMINISTRADOR'] },
+  { title: 'Reportes', to: '/reports', icon: 'mdi-chart-line', rolesPermitidos: ['ADMINISTRADOR'] },
+  { title: 'Configuración', to: '/settings', icon: 'mdi-cog', rolesPermitidos: ['ADMINISTRADOR'] },
+  { title: 'Mis Compras', to: '/compras', icon: 'mdi-cart', rolesPermitidos: ['CLIENTE'] },
+  { title: 'Perfil', to: '/perfil', icon: 'mdi-account', rolesPermitidos: ['CLIENTE'] },
 ]
+
+const itemsVisibles = computed(() =>
+  menuItems.filter(item => item.rolesPermitidos.includes(rol.value))
+)
+
 
 const logout = () => {
   store.commit('clearUser')
@@ -240,11 +231,11 @@ const logout = () => {
   .custom-sidebar {
     width: 260px !important;
   }
-  
+
   .logo-text h3 {
     font-size: 1.1rem;
   }
-  
+
   .item-title {
     font-size: 0.9rem !important;
   }

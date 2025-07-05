@@ -1,6 +1,6 @@
 <template>
   <section class="carousel-wrapper">
-    <h2 class="carousel-title"> Productos Nuevos</h2>
+    <h2 class="carousel-title">Productos Nuevos</h2>
 
     <!-- Flechas -->
     <button class="arrow left" @click="scrollLeft">&#8592;</button>
@@ -8,76 +8,60 @@
 
     <!-- Carrusel -->
     <div ref="carousel" class="carousel-container">
-      <div
-        v-for="(product, i) in products"
-        :key="i"
-        class="product-card"
-      >
-        <img :src="product.image" alt="Producto" />
-        <h3>{{ product.name }}</h3>
-        <p class="description">{{ product.description }}</p>
-        <p class="price">S/ {{ product.price }}</p>
-        <button class="buy-button">Comprar</button>
+      <div v-for="product in products" :key="product.id" class="product-card">
+        <img :src="getImageUrl(product.id)" alt="Producto" />
+        <h3>{{ product.nombre }}</h3>
+        <p class="description">{{ product.caracteristicas }}</p>
+        <p class="price">S/ {{ product.precioVenta }}</p>
+        <button class="buy-button" @click="comprarProducto(product.id)">Comprar</button>
       </div>
     </div>
   </section>
 </template>
 
-<script>
-export default {
-  name: 'ProductComponent',
-  data() {
-    return {
-      products: [
-        {
-          name: 'HP Pavilion 14"',
-          price: 1999,
-          image: '/home/product/image1.png',
-          description: 'Ligera, rápida y perfecta para estudiantes.'
-        },
-        {
-          name: 'Lenovo Ideapad 3',
-          price: 1899,
-          image: '/home/product/image2.png',
-          description: 'Potencia y diseño accesible para el hogar.'
-        },
-        {
-          name: 'Asus ZenBook S',
-          price: 2499,
-          image: '/home/product/image3.png',
-          description: 'Ultra delgada con gran autonomía.'
-        },
-        {
-          name: 'MacBook Air M1',
-          price: 3999,
-          image: '/home/product/image4.png',
-          description: 'Rendimiento silencioso con chip M1.'
-        },
-        {
-          name: 'Dell XPS 13',
-          price: 2999,
-          image: '/home/product/image5.png',
-          description: 'Pantalla infinita y gran rendimiento.'
-        },
-        {
-          name: 'Huawei MateBook D15',
-          price: 1799,
-          image: '/home/product/image6.png',
-          description: 'Equilibrio entre elegancia y potencia.'
-        }
-      ]
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+import { listProductApi } from '@/api/ProductService'
+
+const products = ref([])
+const carousel = ref(null)
+const store = useStore()
+const router = useRouter()
+
+const getProducts = async () => {
+  try {
+    const response = await listProductApi()
+    if (response?.data) {
+      // Filtrar productos activos con imagen
+      products.value = response.data.filter(p => p.estado && p.imagen !== null)
     }
-  },
-  methods: {
-    scrollLeft() {
-      this.$refs.carousel.scrollLeft -= 300
-    },
-    scrollRight() {
-      this.$refs.carousel.scrollLeft += 300
-    }
+  } catch (error) {
+    console.error('Error al cargar productos', error)
   }
 }
+
+const getImageUrl = (id) => `http://localhost:8080/api/productos/${id}/imagen`
+
+const scrollLeft = () => {
+  carousel.value.scrollLeft -= 300
+}
+
+const scrollRight = () => {
+  carousel.value.scrollLeft += 300
+}
+
+const comprarProducto = (id) => {
+  store.commit('setProductoSeleccionado', id)
+  router.push('/productDetail')
+}
+
+onMounted(() => {
+  getProducts()
+})
 </script>
+
 
 <style scoped>
 .carousel-wrapper {
@@ -93,7 +77,7 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #333;
+  color: #b71c1c;
 }
 
 .carousel-container {
@@ -142,13 +126,13 @@ export default {
 
 .price {
   font-size: 0.9rem;
-  color: red;
+  color: #b71c1c;
   font-weight: bold;
   margin-bottom: 8px;
 }
 
 .buy-button {
-  background-color: red;
+  background-color: #b71c1c;
   color: white;
   border: none;
   padding: 6px 10px;
@@ -158,7 +142,7 @@ export default {
 }
 
 .buy-button:hover {
-  background-color: darkred;
+  background-color: #a31515;
 }
 
 .arrow {
