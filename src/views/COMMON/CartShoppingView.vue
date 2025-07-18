@@ -222,7 +222,6 @@ const aplicarCodigoPromocion = async () => {
     const response = await getPromocionCodeApi(codigoPromocion.value)
     if (response) {
       promocionData.value = response.data
-      console.log(response.data , "sss")
       promocionAplicada.value = true
       promocionValida.value = true
       mensajePromocion.value = `¡Código aplicado! ${(response.data.descuento * 100).toFixed(0)}% de descuento`

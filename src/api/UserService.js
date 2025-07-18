@@ -19,3 +19,9 @@ export function createUserApi(payload) {
 
   return axiosInstance.post(`${baseURLv1}/usuarios`, payload);
 }
+
+
+export function updateUserApi(payload, id) {
+
+  return axiosInstance.put(`${baseURLv1}/usuarios/${id}`, payload);
+}
