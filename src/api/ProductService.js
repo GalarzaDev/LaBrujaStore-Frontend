@@ -7,12 +7,8 @@ const baseURLv1 = process.env.VUE_APP_URL_BASE_BACKEND;
 
 
 
-export function listProductApi(token ) {
-    return axiosInstance.get(`${baseURLv1}/productos`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+export function listProductApi( ) {
+    return axiosInstance.get(`${baseURLv1}/productos/activos`);
   }
 
   export function createProductApi(formdata) {

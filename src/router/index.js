@@ -9,6 +9,7 @@ import Category from '@/views/ADMIN/CategoryView.vue'
 import ProductDetail from '@/views/COMMON/ProductDetailView.vue'
 import Cart from '@/views/COMMON/CartShoppingView.vue'
 import Shopping from '@/views/CLIENT/ShoppingView.vue'
+import Profile from '@/views/CLIENT/ProfileView.vue'
 
 const routes = [
   // Rutas públicas (sin protección)
@@ -65,6 +66,12 @@ const routes = [
     meta: { requiresAuth: true, allowedRoles: ['CLIENTE'] }
   },
 
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile,
+    meta: { requiresAuth: true, allowedRoles: ['CLIENTE'] }
+  },
   // Ruta catch-all para manejar 404
   {
     path: '/:pathMatch(.*)*',

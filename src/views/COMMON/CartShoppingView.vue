@@ -39,28 +39,16 @@
 
       <div v-if="pasoActual === 2" class="login-form">
         <h2 class="form-title">Datos de Usuario</h2>
-        
+
         <form @submit.prevent="loginUsuario">
           <div class="form-group">
             <label for="correo">Correo Electrónico</label>
-            <input 
-              id="correo"
-              type="email"
-              v-model="correo"
-              placeholder="ejemplo@correo.com"
-              required
-            />
+            <input id="correo" type="email" v-model="correo" placeholder="ejemplo@correo.com" required />
           </div>
 
           <div class="form-group">
             <label for="contrasena">Contraseña</label>
-            <input 
-              id="contrasena"
-              type="password"
-              v-model="contrasena"
-              placeholder="Tu contraseña"
-              required
-            />
+            <input id="contrasena" type="password" v-model="contrasena" placeholder="Tu contraseña" required />
           </div>
 
           <div class="form-actions">
@@ -72,18 +60,12 @@
 
       <div v-if="pasoActual === 3" class="payment-form">
         <h2 class="form-title">Información de Pago</h2>
-        
+
         <form @submit.prevent="realizarCompra">
-          <div class="form-group">
-            <label for="direccion">Dirección de Entrega</label>
-            <textarea 
-              id="direccion"
-              v-model="direccionEntrega"
-              placeholder="Ingresa tu dirección completa..."
-              required
-              rows="3"
-            ></textarea>
-          </div>
+          <v-autocomplete v-model="direccionSeleccionada" :items="direcciones" item-title="label" item-value="id"
+            label="Dirección de Entrega" placeholder="Selecciona una dirección" required></v-autocomplete>
+
+
 
           <div class="form-group">
             <label for="metodoPago">Método de Pago</label>
@@ -113,7 +95,7 @@ import { listProductApi } from '@/api/ProductService'
 import { createShoppingApi } from '@/api/ShoppingService'
 import { createDetailShoppingApi } from '@/api/ShoppingService'
 import { loginUserApi } from '@/api/UserService'
-
+import { listByDirectionApi } from '@/api/DirectionService'
 const store = useStore()
 const router = useRouter()
 const productosDisponibles = ref([])
@@ -123,10 +105,14 @@ const pasoActual = ref(1)
 
 const correo = ref('')
 const contrasena = ref('')
-
-
-const direccionEntrega = ref('')
 const metodoPago = ref('')
+
+const direcciones = ref([])
+const direccionSeleccionada = ref(null)
+
+
+
+
 
 const getImageUrl = (id) => `http://localhost:8080/api/productos/${id}/imagen`
 
@@ -181,13 +167,14 @@ const pasoAnterior = () => {
 
 const loginUsuario = async () => {
   try {
-    const response = await loginUserApi({ 
-      correo: correo.value, 
-      contra: contrasena.value 
+    const response = await loginUserApi({
+      correo: correo.value,
+      contra: contrasena.value
     })
 
     if (response?.data?.id) {
       usuarioId.value = response.data.id
+      await geDireccion()
       siguientePaso()
     } else {
       alert('Usuario no registrado. Debes registrarte primero.')
@@ -199,13 +186,33 @@ const loginUsuario = async () => {
   }
 }
 
-const realizarCompra = async () => {
+
+const geDireccion = async () => {
   try {
-    if (!direccionEntrega.value.trim()) {
-      alert('Por favor ingresa tu dirección de entrega.')
+    if (!usuarioId.value) return
+    const response = await listByDirectionApi(usuarioId.value)
+
+    if (response?.data) {
+      direcciones.value = response.data.map(dir => ({
+        id: dir.id,
+        label: `${dir.tipo} - ${dir.calle} ${dir.numero}, ${dir.ciudad} (${dir.codigoPostal})`
+      }))
+    }
+  } catch (error) {
+    console.error("Error al listar direcciones", error)
+  }
+}
+
+
+const realizarCompra = async () => {
+  geDireccion();
+  try {
+    if (!direccionSeleccionada.value) {
+      alert('Por favor selecciona una dirección de entrega.')
       return
     }
-    
+
+
     if (!metodoPago.value) {
       alert('Por favor selecciona un método de pago.')
       return
@@ -213,7 +220,8 @@ const realizarCompra = async () => {
 
     const payloadCompra = {
       precioFinal: totalGeneral.value,
-      estado: 'PAGADO',
+      direccion: { id: parseInt(direccionSeleccionada.value) },
+      estado: 'PENDIENTE',
       usuario: { id: usuarioId.value },
       promocion: null
     }
@@ -244,7 +252,8 @@ const realizarCompra = async () => {
 }
 
 onMounted(() => {
-  cargarProductos()
+  cargarProductos();
+  geDireccion();
 })
 </script>
 
@@ -264,7 +273,7 @@ onMounted(() => {
   font-weight: bold;
   margin-bottom: 40px;
   color: #dc143c;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .cart-table {
@@ -457,28 +466,28 @@ onMounted(() => {
   .cart-wrapper {
     padding: 20px;
   }
-  
+
   .cart-title {
     font-size: 1.8rem;
   }
-  
+
   .cart-table {
     overflow-x: auto;
   }
-  
+
   .cart-table table {
     min-width: 600px;
   }
-  
+
   .cart-total {
     font-size: 1.3rem;
   }
-  
+
   .form-actions {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .continue-btn,
   .pay-btn,
   .back-btn {
