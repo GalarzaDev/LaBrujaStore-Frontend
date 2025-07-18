@@ -27,15 +27,51 @@
           </tbody>
         </table>
 
+        <!-- Sección de código promocional -->
+        <div class="promo-section">
+          <div class="promo-input-group">
+            <input 
+              v-model="codigoPromocion" 
+              type="text" 
+              placeholder="Ingresa código promocional" 
+              class="promo-input"
+              :disabled="promocionAplicada"
+            />
+            <button 
+              @click="aplicarCodigoPromocion" 
+              class="promo-btn"
+              :disabled="!codigoPromocion || promocionAplicada"
+            >
+              {{ promocionAplicada ? 'Aplicado' : 'Aplicar' }}
+            </button>
+          </div>
+          
+          <div v-if="mensajePromocion" class="promo-message" :class="{ 'error': !promocionValida }">
+            {{ mensajePromocion }}
+          </div>
+        </div>
+
+        <!-- Resumen de totales -->
         <div class="cart-total">
-          <strong>Total a pagar: S/ {{ totalGeneral.toFixed(2) }}</strong>
+          <div class="total-line">
+            <span>Subtotal:</span>
+            <span>S/ {{ totalGeneral.toFixed(2) }}</span>
+          </div>
+          
+          <div v-if="promocionAplicada" class="total-line discount">
+            <span>Descuento ({{ (promocionData.descuento * 100).toFixed(0) }}%):</span>
+            <span>-S/ {{ montoDescuento.toFixed(2) }}</span>
+          </div>
+          
+          <div class="total-line final">
+            <strong>Total a pagar: S/ {{ totalConDescuento.toFixed(2) }}</strong>
+          </div>
         </div>
 
         <div class="cart-actions">
           <button @click="siguientePaso" class="continue-btn">Continuar</button>
         </div>
       </div>
-
 
       <div v-if="pasoActual === 2" class="login-form">
         <h2 class="form-title">Datos de Usuario</h2>
@@ -62,10 +98,15 @@
         <h2 class="form-title">Información de Pago</h2>
 
         <form @submit.prevent="realizarCompra">
-          <v-autocomplete v-model="direccionSeleccionada" :items="direcciones" item-title="label" item-value="id"
-            label="Dirección de Entrega" placeholder="Selecciona una dirección" required></v-autocomplete>
-
-
+          <v-autocomplete 
+            v-model="direccionSeleccionada" 
+            :items="direcciones" 
+            item-title="label" 
+            item-value="id"
+            label="Dirección de Entrega" 
+            placeholder="Selecciona una dirección" 
+            required
+          ></v-autocomplete>
 
           <div class="form-group">
             <label for="metodoPago">Método de Pago</label>
@@ -96,12 +137,13 @@ import { createShoppingApi } from '@/api/ShoppingService'
 import { createDetailShoppingApi } from '@/api/ShoppingService'
 import { loginUserApi } from '@/api/UserService'
 import { listByDirectionApi } from '@/api/DirectionService'
+import { getPromocionCodeApi } from '@/api/PromocionService'
+
 const store = useStore()
 const router = useRouter()
 const productosDisponibles = ref([])
 const usuarioId = ref(null)
 const pasoActual = ref(1)
-
 
 const correo = ref('')
 const contrasena = ref('')
@@ -110,9 +152,12 @@ const metodoPago = ref('')
 const direcciones = ref([])
 const direccionSeleccionada = ref(null)
 
-
-
-
+// Variables para promociones
+const codigoPromocion = ref('')
+const promocionData = ref(null)
+const promocionAplicada = ref(false)
+const promocionValida = ref(false)
+const mensajePromocion = ref('')
 
 const getImageUrl = (id) => `http://localhost:8080/api/productos/${id}/imagen`
 
@@ -157,6 +202,40 @@ const totalGeneral = computed(() => {
   return groupedItems.value.reduce((acc, item) => acc + item.subtotal, 0)
 })
 
+const montoDescuento = computed(() => {
+  if (!promocionAplicada.value || !promocionData.value) return 0
+  return totalGeneral.value * promocionData.value.descuento
+})
+
+const totalConDescuento = computed(() => {
+  return totalGeneral.value - montoDescuento.value
+})
+
+const aplicarCodigoPromocion = async () => {
+  if (!codigoPromocion.value.trim()) {
+    mensajePromocion.value = 'Por favor ingresa un código promocional'
+    promocionValida.value = false
+    return
+  }
+
+  try {
+    const response = await getPromocionCodeApi(codigoPromocion.value)
+    if (response) {
+      promocionData.value = response.data
+      console.log(response.data , "sss")
+      promocionAplicada.value = true
+      promocionValida.value = true
+      mensajePromocion.value = `¡Código aplicado! ${(response.data.descuento * 100).toFixed(0)}% de descuento`
+    }
+  } catch (error) {
+    console.error("Código no existe", error)
+    mensajePromocion.value = 'Código promocional inválido'
+    promocionValida.value = false
+    promocionAplicada.value = false
+    promocionData.value = null
+  }
+}
+
 const siguientePaso = () => {
   pasoActual.value++
 }
@@ -186,7 +265,6 @@ const loginUsuario = async () => {
   }
 }
 
-
 const geDireccion = async () => {
   try {
     if (!usuarioId.value) return
@@ -203,15 +281,12 @@ const geDireccion = async () => {
   }
 }
 
-
 const realizarCompra = async () => {
-  geDireccion();
   try {
     if (!direccionSeleccionada.value) {
       alert('Por favor selecciona una dirección de entrega.')
       return
     }
-
 
     if (!metodoPago.value) {
       alert('Por favor selecciona un método de pago.')
@@ -219,17 +294,16 @@ const realizarCompra = async () => {
     }
 
     const payloadCompra = {
-      precioFinal: totalGeneral.value,
+      precioFinal: totalGeneral.value, // Precio original sin descuento
       direccion: { id: parseInt(direccionSeleccionada.value) },
       estado: 'PENDIENTE',
       usuario: { id: usuarioId.value },
-      promocion: null
+      promocion: promocionAplicada.value && promocionData.value ? { id: promocionData.value.id } : null
     }
 
     const compraResponse = await createShoppingApi(payloadCompra)
     const compraId = compraResponse?.data?.id
     if (!compraId) throw new Error('No se pudo crear la compra.')
-
 
     for (const item of store.state.carrito) {
       const detallePayload = {
@@ -252,8 +326,8 @@ const realizarCompra = async () => {
 }
 
 onMounted(() => {
-  cargarProductos();
-  geDireccion();
+  cargarProductos()
+  geDireccion()
 })
 </script>
 
@@ -273,7 +347,6 @@ onMounted(() => {
   font-weight: bold;
   margin-bottom: 40px;
   color: #dc143c;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .cart-table {
@@ -295,7 +368,6 @@ onMounted(() => {
   padding: 15px 12px;
   text-align: center;
   font-weight: bold;
-  font-size: 1.1rem;
   border: none;
 }
 
@@ -307,15 +379,6 @@ onMounted(() => {
   border-bottom: 1px solid #ddd;
 }
 
-.cart-table tr:hover td {
-  background-color: #f0f0f0;
-  transition: background-color 0.3s ease;
-}
-
-.cart-table tr:last-child td {
-  border-bottom: none;
-}
-
 .product-img {
   width: 80px;
   height: 80px;
@@ -324,27 +387,107 @@ onMounted(() => {
   border: 2px solid #dc143c;
 }
 
-.cart-total {
-  text-align: right;
-  font-size: 1.5rem;
-  margin-top: 25px;
-  font-weight: bold;
-  color: #dc143c;
-  background-color: #f8f9fa;
+/* Sección de código promocional */
+.promo-section {
+  margin: 20px 0;
   padding: 20px;
+  background-color: #f0f8ff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.promo-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.promo-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.promo-input:focus {
+  outline: none;
+  border-color: #dc143c;
+}
+
+.promo-btn {
+  padding: 12px 20px;
+  background-color: #dc143c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.promo-btn:hover:not(:disabled) {
+  background-color: #b91c3c;
+}
+
+.promo-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.promo-message {
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.promo-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+/* Resumen de totales */
+.cart-total {
+  margin-top: 25px;
+  padding: 20px;
+  background-color: #f8f9fa;
   border-radius: 8px;
   border: 2px solid #dc143c;
 }
 
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.total-line.discount {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.total-line.final {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #dc143c;
+  border-top: 2px solid #dc143c;
+  padding-top: 10px;
+  margin-top: 15px;
+}
+
 /* Formularios */
-.login-form,
-.payment-form {
+.login-form, .payment-form {
   background-color: #f8f9fa;
   padding: 30px;
   border-radius: 10px;
   margin-top: 20px;
   border: 2px solid #dc143c;
-  box-shadow: 0 4px 15px rgba(220, 20, 60, 0.1);
 }
 
 .form-title {
@@ -364,90 +507,58 @@ onMounted(() => {
   margin-bottom: 8px;
   color: #333;
   font-weight: 600;
-  font-size: 1.1rem;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
+.form-group input, .form-group select {
   width: 100%;
   padding: 12px;
   border: 2px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
   background-color: white;
-  color: #333;
 }
 
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-group input:focus, .form-group select:focus {
   outline: none;
   border-color: #dc143c;
-  box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-group select {
-  cursor: pointer;
 }
 
 /* Botones */
-.cart-actions,
-.form-actions {
+.cart-actions, .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
   margin-top: 25px;
 }
 
-.continue-btn,
-.pay-btn {
+.continue-btn, .pay-btn {
   padding: 15px 30px;
-  font-size: 1.1rem;
   background: linear-gradient(45deg, #dc143c, #b91c3c);
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
 }
 
-.continue-btn:hover,
-.pay-btn:hover {
+.continue-btn:hover, .pay-btn:hover {
   background: linear-gradient(45deg, #b91c3c, #dc143c);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.5);
 }
 
 .back-btn {
   padding: 15px 30px;
-  font-size: 1.1rem;
   background: linear-gradient(45deg, #6c757d, #5a6268);
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
 }
 
 .back-btn:hover {
   background: linear-gradient(45deg, #5a6268, #6c757d);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.5);
 }
 
 .empty-cart {
@@ -461,38 +572,21 @@ onMounted(() => {
   border: 2px dashed #dc143c;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .cart-wrapper {
     padding: 20px;
   }
-
-  .cart-title {
-    font-size: 1.8rem;
-  }
-
-  .cart-table {
-    overflow-x: auto;
-  }
-
-  .cart-table table {
-    min-width: 600px;
-  }
-
-  .cart-total {
-    font-size: 1.3rem;
-  }
-
-  .form-actions {
+  
+  .promo-input-group {
     flex-direction: column;
-    gap: 10px;
   }
-
-  .continue-btn,
-  .pay-btn,
-  .back-btn {
-    padding: 12px 25px;
+  
+  .total-line {
     font-size: 1rem;
+  }
+  
+  .total-line.final {
+    font-size: 1.3rem;
   }
 }
 </style>
