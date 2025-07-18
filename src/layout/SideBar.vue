@@ -5,7 +5,7 @@
       <div class="logo-container">
         <v-icon class="logo-icon" size="40">mdi-store</v-icon>
         <div class="logo-text">
-          <h3>Admin Panel</h3>
+          <h3>Panel Cliente</h3>
           <span class="subtitle">Gestión</span>
         </div>
       </div>
@@ -64,6 +64,7 @@ const menuItems = [
   { title: 'Configuración', to: '/settings', icon: 'mdi-cog', rolesPermitidos: ['ADMINISTRADOR'] },
   { title: 'Mis Compras', to: '/shopping', icon: 'mdi-cart', rolesPermitidos: ['CLIENTE'] },
   { title: 'Perfil', to: '/profile', icon: 'mdi-account', rolesPermitidos: ['CLIENTE'] },
+    { title: 'Devoluciones', to: '/devolucion', icon: 'mdi mdi-swap-horizontal', rolesPermitidos: ['CLIENTE'] },
 ]
 
 const itemsVisibles = computed(() =>
