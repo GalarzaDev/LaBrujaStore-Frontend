@@ -25,22 +25,15 @@
         {{ new Date(item.fechaSolicitud).toLocaleString() }}
       </template>
 
-      <template v-slot:[`item.acciones`]="{ item }">
-        <v-btn icon size="small" @click="emitEditar(item)">
-          <v-icon>mdi-pencil</v-icon>
-        </v-btn>
-        <v-btn icon size="small" color="error" @click="emitEliminar(item)">
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </template>
+   
     </v-data-table>
   </v-card>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps } from 'vue'
 
-const emit = defineEmits(['editar', 'eliminar'])
+
 
 defineProps({
   items: {
@@ -56,14 +49,7 @@ const headers = [
   { title: 'Descripción', key: 'descripcion' },
   { title: 'Estado', key: 'estado' },
   { title: 'Fecha Solicitud', key: 'fechaSolicitud' },
-  { title: 'Acciones', key: 'acciones', sortable: false }
+
 ]
 
-const emitEditar = (item) => {
-  emit('editar', item)
-}
-
-const emitEliminar = (item) => {
-  emit('eliminar', item)
-}
 </script>
